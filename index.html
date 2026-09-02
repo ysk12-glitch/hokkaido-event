@@ -17,13 +17,12 @@ button{background:#fff;color:#0b5cff;font-weight:700;padding:10px 14px}
 select{padding:10px;background:#fff;color:#222;flex:1}
 main{max-width:760px;margin:auto;padding:16px}
 .monthbar{display:flex;align-items:center;justify-content:space-between;margin:2px 0 14px}
-.monthbar button{background:#fff;box-shadow:0 1px 4px #0001;font-size:20px;padding:6px 13px}
 .month{font-size:22px;font-weight:800}
 .count{font-size:13px;color:#666;margin-bottom:12px}
-.event{background:#fff;border-radius:14px;padding:15px;margin-bottom:11px;box-shadow:0 1px 5px #0001}
-.event.high{border-left:6px solid #e53935}
-.event.medium{border-left:6px solid #f5a623}
-.event.low{border-left:6px solid #2e9d59}
+.event{background:#fff;border-radius:14px;padding:15px;margin-bottom:11px;box-shadow:0 1px 5px #0001;border:0;border-left:6px solid #999;width:100%;text-align:left;cursor:pointer}
+.event.high{border-left-color:#e53935}
+.event.medium{border-left-color:#f5a623}
+.event.low{border-left-color:#2e9d59}
 .date{font-weight:800;color:#0b5cff;font-size:14px}
 .name{font-size:18px;font-weight:800;margin:5px 0}
 .place{font-size:14px;color:#555}
@@ -31,8 +30,18 @@ main{max-width:760px;margin:auto;padding:16px}
 .high .badge{background:#ffe4e4;color:#c62828}
 .medium .badge{background:#fff0d4;color:#a25b00}
 .low .badge{background:#e4f5e9;color:#23753f}
+.tap{font-size:11px;color:#777;margin-top:8px}
 .empty{text-align:center;padding:40px 10px;color:#777;background:#fff;border-radius:14px}
 footer{font-size:11px;color:#777;text-align:center;padding:20px}
+.modal{display:none;position:fixed;inset:0;background:#0008;z-index:20;padding:20px;align-items:center;justify-content:center}
+.modal.show{display:flex}
+.modal-card{background:#fff;border-radius:18px;max-width:620px;width:100%;max-height:85vh;overflow:auto;padding:22px;box-shadow:0 8px 30px #0005}
+.modal-date{color:#0b5cff;font-weight:800}
+.modal h2{font-size:22px;margin:7px 0 12px}
+.modal-place{color:#555;margin-bottom:12px}
+.modal-type{display:inline-block;background:#eef3ff;color:#0b5cff;border-radius:8px;padding:5px 9px;font-size:12px;font-weight:700}
+.modal-desc{line-height:1.7;margin:16px 0}
+.close{width:100%;background:#0b5cff;color:#fff;margin-top:8px}
 </style>
 </head>
 <body>
@@ -47,54 +56,76 @@ footer{font-size:11px;color:#777;text-align:center;padding:20px}
 </header>
 
 <main>
-  <div class="monthbar">
-    <div class="month" id="monthTitle"></div>
-  </div>
+  <div class="monthbar"><div class="month" id="monthTitle"></div></div>
   <div class="count" id="count"></div>
   <div id="events"></div>
 </main>
 
 <footer>
-  イベント情報は随時変更される場合があります。<br>
-  参考：北海道観光公式サイト HOKKAIDO LOVE!
+  イベント情報は変更される場合があります。<br>
+  参考：北海道観光公式サイト HOKKAIDO LOVE! ／ 札幌観光協会
 </footer>
+
+<div class="modal" id="modal">
+  <div class="modal-card">
+    <div class="modal-date" id="modalDate"></div>
+    <h2 id="modalName"></h2>
+    <div class="modal-place" id="modalPlace"></div>
+    <span class="modal-type" id="modalType"></span>
+    <div class="modal-desc" id="modalDesc"></div>
+    <button class="close" id="closeModal">閉じる</button>
+  </div>
+</div>
 
 <script>
 const events = [
-  {start:"2026-09-04",end:"2026-09-06",name:"とかちマルシェ",place:"帯広市",level:"medium",type:"グルメ・マルシェ"},
-  {start:"2026-09-05",end:"2026-09-27",name:"特急ニセコ号",place:"札幌・ニセコ・函館",level:"low",type:"観光・交通"},
-  {start:"2026-09-06",end:"2026-09-06",name:"太陽の丘えんがる公園・コスモスフェスタ",place:"遠軽町",level:"medium",type:"イベント"},
-  {start:"2026-09-06",end:"2026-09-06",name:"千歳基地「航空祭」",place:"千歳市",level:"high",type:"航空イベント"},
-  {start:"2026-09-11",end:"2026-10-03",name:"さっぽろオータムフェスト",place:"札幌市",level:"high",type:"大型グルメイベント"},
-  {start:"2026-09-12",end:"2026-09-13",name:"釧路大漁どんぱく",place:"釧路市",level:"high",type:"祭り・花火"},
-  {start:"2026-09-13",end:"2026-10-12",name:"奇跡のイルミネート",place:"上川町・層雲峡",level:"low",type:"イルミネーション"},
-  {start:"2026-09-19",end:"2026-09-19",name:"鉄道フェスティバル in 北海道",place:"札幌市",level:"medium",type:"イベント"},
-  {start:"2026-09-19",end:"2026-09-20",name:"いわみざわ百餅祭り",place:"岩見沢市",level:"high",type:"祭り"},
-  {start:"2026-09-19",end:"2026-09-21",name:"北の恵みあさひかわ食べマルシェ",place:"旭川市",level:"high",type:"大型グルメイベント"},
-  {start:"2026-09-20",end:"2026-09-20",name:"松前城下マグロまつり",place:"松前町",level:"medium",type:"グルメイベント"},
-  {start:"2026-09-20",end:"2026-09-20",name:"北海道福島町 FOOD STADIUM",place:"福島町",level:"medium",type:"グルメイベント"},
-  {start:"2026-09-24",end:"2026-09-24",name:"地獄の谷の鬼花火",place:"登別市",level:"medium",type:"花火"},
-  {start:"2026-09-26",end:"2026-09-27",name:"グルメワンダーパーク函館",place:"函館市",level:"medium",type:"大型グルメイベント"},
-  {start:"2026-09-26",end:"2026-09-27",name:"インディアン水車まつり",place:"千歳市",level:"medium",type:"祭り"},
-  {start:"2026-09-27",end:"2026-09-27",name:"しんとく新そば祭り",place:"新得町",level:"medium",type:"グルメイベント"}
+  {start:"2026-09-04",end:"2026-09-06",name:"とかちマルシェ",place:"帯広市",level:"medium",type:"グルメ・マルシェ",desc:"JR帯広駅周辺で開催される秋恒例の食イベント。道東のグルメやスイーツ、生演奏などを楽しめます。"},
+  {start:"2026-09-05",end:"2026-09-27",name:"特急ニセコ号",place:"札幌・ニセコ・函館",level:"low",type:"観光・交通",desc:"札幌・ニセコ・函館を結ぶ秋の特別列車。沿線観光や鉄道利用の増加が見込まれます。"},
+  {start:"2026-09-05",end:"2026-09-05",name:"北海道芸術花火",place:"札幌市・モエレ沼公園",level:"high",type:"花火",desc:"モエレ沼公園で開催される大規模な花火イベント。周辺道路や公共交通の混雑に注意が必要です。"},
+  {start:"2026-06-01",end:"2026-10-31",name:"定山渓夏灯路",place:"札幌市・定山渓",level:"low",type:"ライトアップ",desc:"定山渓温泉街を提灯やランタンの灯りで彩る夜の散策イベント。9〜10月は18時頃から点灯します。"},
+  {start:"2026-09-06",end:"2026-09-06",name:"太陽の丘えんがる公園・コスモスフェスタ",place:"遠軽町",level:"medium",type:"花・イベント",desc:"約10ヘクタールの丘をたくさんのコスモスが彩る秋の人気イベント。園内イベントも行われます。"},
+  {start:"2026-09-06",end:"2026-09-06",name:"千歳基地「航空祭」",place:"千歳市",level:"high",type:"航空イベント",desc:"ブルーインパルスなどの展示飛行が予定される航空祭。千歳市内や周辺道路の混雑に特に注意。"},
+  {start:"2026-09-11",end:"2026-10-03",name:"さっぽろオータムフェスト",place:"札幌市・大通公園",level:"high",type:"大型グルメイベント",desc:"北海道最大級のグルメイベント。大通公園に道内各地の食が集まり、期間中は札幌中心部の人出が大きく増えます。"},
+  {start:"2026-09-12",end:"2026-09-13",name:"釧路大漁どんぱく",place:"釧路市",level:"high",type:"祭り・花火",desc:"花火と食を楽しむ釧路の秋の大型イベント。市街地や会場周辺の混雑が予想されます。"},
+  {start:"2026-09-13",end:"2026-10-12",name:"奇跡のイルミネート",place:"上川町・層雲峡",level:"low",type:"イルミネーション",desc:"層雲峡温泉で自然とデジタルアートを組み合わせたライトアップを楽しめます。"},
+  {start:"2026-09-19",end:"2026-09-19",name:"鉄道フェスティバル in 北海道",place:"札幌市",level:"medium",type:"鉄道イベント",desc:"道内各地の鉄道や路面電車が集まるイベント。展示、体験、グッズ販売などが行われます。"},
+  {start:"2026-09-19",end:"2026-09-20",name:"いわみざわ百餅祭り",place:"岩見沢市",level:"high",type:"祭り",desc:"巨大な大臼を使った豪快な餅つきが名物の秋祭り。岩見沢市中心部の人出や交通に注意。"},
+  {start:"2026-09-19",end:"2026-09-21",name:"北の恵みあさひかわ食べマルシェ",place:"旭川市",level:"high",type:"大型グルメイベント",desc:"旭川の街が大きな食の市場になるイベント。旭川中心部の歩行者や車の流れが増えます。"},
+  {start:"2026-09-20",end:"2026-09-20",name:"松前城下マグロまつり",place:"松前町",level:"medium",type:"グルメイベント",desc:"本マグロの解体ショーや即売会、旬のマグロ料理などを楽しめる秋の人気イベント。"},
+  {start:"2026-09-20",end:"2026-09-20",name:"北海道福島町 FOOD STADIUM",place:"福島町",level:"medium",type:"グルメイベント",desc:"新そばや旬の海産物、友好都市の美食など、福島町自慢の味覚が集まる秋の食イベント。"},
+  {start:"2026-09-24",end:"2026-09-24",name:"地獄の谷の鬼花火",place:"登別市",level:"medium",type:"花火",desc:"登別地獄谷で湯鬼神が手筒花火を放つ迫力ある夜のイベント。開催日の夜は周辺の人出に注意。"},
+  {start:"2026-09-26",end:"2026-09-27",name:"グルメワンダーパーク函館",place:"函館市・松風町",level:"medium",type:"大型グルメイベント",desc:"函館と全国各地のご当地グルメが集まる大型食イベント。函館駅周辺への来訪者増加が見込まれます。"},
+  {start:"2026-09-26",end:"2026-09-27",name:"インディアン水車まつり",place:"千歳市",level:"medium",type:"祭り・秋の味覚",desc:"千歳川を遡上するサケとインディアン水車、秋の味覚を楽しむイベント。千歳市内の観光客増加に注意。"},
+  {start:"2026-09-27",end:"2026-09-27",name:"しんとく新そば祭り",place:"新得町",level:"medium",type:"グルメイベント",desc:"収穫したての新そばを食べ比べできる、新得町の人気イベント。屋台グルメも楽しめます。"},
+  {start:"2026-10-04",end:"2026-10-04",name:"札幌マラソン",place:"札幌市・真駒内周辺",level:"high",type:"スポーツ",desc:"札幌市内で行われる大規模なマラソン大会。コース周辺では交通規制や人の流れに注意。"},
+  {start:"2026-10-04",end:"2026-10-04",name:"池田町秋のワイン祭り",place:"池田町",level:"medium",type:"グルメイベント",desc:"十勝ワインと牛肉料理を楽しむ池田町を代表する秋のイベント。十勝方面への観光客増加が見込まれます。"},
+  {start:"2026-10-04",end:"2026-10-04",name:"えりも海と山の幸フェスティバル",place:"えりも町",level:"medium",type:"グルメイベント",desc:"海と山の豊かな秋の味覚が集まる、えりもの恒例イベント。地域の食を楽しめます。"},
+  {start:"2026-10-08",end:"2026-10-10",name:"まりも祭り",place:"釧路市・阿寒湖",level:"medium",type:"伝統行事",desc:"マリモを守り湖へ還すことから始まった秋の祭典。アイヌの伝統的な祈りや儀式も受け継がれています。"},
+  {start:"2026-10-08",end:"2026-10-31",name:"阿寒アイヌアートウィーク",place:"釧路市・阿寒湖",level:"low",type:"文化・アート",desc:"阿寒湖の自然、アイヌ文化、現代アートが交差するイベント。文化体験やアートを楽しめます。"},
+  {start:"2026-10-11",end:"2026-10-11",name:"西別川あきあじまつり",place:"別海町",level:"medium",type:"秋の味覚・祭り",desc:"西別鮭を中心に秋の味覚を楽しむ別海町の祭典。地域の特産品を味わえます。"},
+  {start:"2026-10-16",end:"2026-11-08",name:"旧岩船氏庭園・はこだてMOMI-Gフェスタ",place:"函館市・香雪園",level:"medium",type:"紅葉・ライトアップ",desc:"香雪園のカエデ並木などが色づく時期に行われるライトアップイベント。夜間は16〜21時に点灯します。"},
+  {start:"2026-10-18",end:"2026-10-18",name:"しほろ収穫祭",place:"士幌町",level:"medium",type:"収穫祭",desc:"秋の実りを楽しむ士幌町の恒例イベント。しほろ牛や旬の野菜などを味わえます。"},
+  {start:"2026-10-18",end:"2026-10-18",name:"北海道森林スポーツフェスタ",place:"千歳市",level:"medium",type:"スポーツ・アウトドア",desc:"千歳の森を舞台にマラソンなどを楽しむ秋のアウトドアイベント。周辺道路や施設の混雑に注意。"},
+  {start:"2026-10-24",end:"2027-01-04",name:"広尾サンタランド イルミネーション",place:"広尾町",level:"low",type:"イルミネーション",desc:"広尾町のサンタランドで行われるロングランイルミネーション。10月24日にツリー点灯式が行われます。"},
+  {start:"2026-10-31",end:"2026-11-04",name:"おびひろ菊まつり",place:"帯広市",level:"medium",type:"花・祭り",desc:"約2,000鉢の菊が会場を彩る、帯広の秋の祭典。晩秋の市街地イベントとして楽しめます。"}
 ];
 
 let current = new Date();
 current.setDate(1);
 
-const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
 const jpDate = s => {
   const d = new Date(s+"T00:00:00");
   return `${d.getMonth()+1}/${d.getDate()}（${"日月火水木金土"[d.getDay()]}）`;
 };
 const rangeText = e => e.start===e.end ? jpDate(e.start) : `${jpDate(e.start)}〜${jpDate(e.end)}`;
 
-function overlapsMonth(e, y, m){
-  const first = `${y}-${String(m+1).padStart(2,"0")}-01`;
-  const lastDate = new Date(y,m+1,0).getDate();
-  const last = `${y}-${String(m+1).padStart(2,"0")}-${String(lastDate).padStart(2,"0")}`;
-  return e.start <= last && e.end >= first;
+function overlapsMonth(e,y,m){
+  const first=`${y}-${String(m+1).padStart(2,"0")}-01`;
+  const lastDate=new Date(y,m+1,0).getDate();
+  const last=`${y}-${String(m+1).padStart(2,"0")}-${String(lastDate).padStart(2,"0")}`;
+  return e.start<=last && e.end>=first;
 }
+
 function buildMonthSelect(){
   const sel=document.getElementById("monthSelect");
   sel.innerHTML="";
@@ -107,31 +138,51 @@ function buildMonthSelect(){
   }
   sel.value=`${current.getFullYear()}-${current.getMonth()}`;
 }
+
+function openModal(e){
+  document.getElementById("modalDate").textContent=rangeText(e);
+  document.getElementById("modalName").textContent=e.name;
+  document.getElementById("modalPlace").textContent="📍 "+e.place;
+  document.getElementById("modalType").textContent=e.type;
+  document.getElementById("modalDesc").textContent=e.desc;
+  document.getElementById("modal").classList.add("show");
+}
+
 function render(){
   buildMonthSelect();
-  const y=current.getFullYear(), m=current.getMonth();
+  const y=current.getFullYear(),m=current.getMonth();
   document.getElementById("monthTitle").textContent=`${y}年${m+1}月`;
   const list=events.filter(e=>overlapsMonth(e,y,m)).sort((a,b)=>a.start.localeCompare(b.start));
   document.getElementById("count").textContent=`今月の掲載イベント：${list.length}件`;
   const box=document.getElementById("events");
   box.innerHTML="";
-  if(!list.length){box.innerHTML='<div class="empty">この月のイベントはまだ登録されていません。</div>';return;}
+  if(!list.length){
+    box.innerHTML='<div class="empty">この月のイベントはまだ登録されていません。</div>';
+    return;
+  }
   list.forEach(e=>{
-    const div=document.createElement("div");
+    const div=document.createElement("button");
     div.className=`event ${e.level}`;
     const label=e.level==="high"?"仕事への影響に注意":e.level==="medium"?"混雑に注意":"参考イベント";
     div.innerHTML=`<div class="date">${rangeText(e)}</div>
       <div class="name">${e.name}</div>
       <div class="place">📍 ${e.place}</div>
-      <span class="badge">${e.type} ・ ${label}</span>`;
+      <span class="badge">${e.type} ・ ${label}</span>
+      <div class="tap">タップするとイベント内容を表示</div>`;
+    div.onclick=()=>openModal(e);
     box.appendChild(div);
   });
 }
+
 document.getElementById("prev").onclick=()=>{current.setMonth(current.getMonth()-1);render();};
 document.getElementById("next").onclick=()=>{current.setMonth(current.getMonth()+1);render();};
 document.getElementById("monthSelect").onchange=e=>{
   const [y,m]=e.target.value.split("-").map(Number);
   current=new Date(y,m,1);render();
+};
+document.getElementById("closeModal").onclick=()=>document.getElementById("modal").classList.remove("show");
+document.getElementById("modal").onclick=e=>{
+  if(e.target.id==="modal") document.getElementById("modal").classList.remove("show");
 };
 render();
 </script>
