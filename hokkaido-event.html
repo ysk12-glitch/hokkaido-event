@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b5cff">
+<title>北海道イベントチェック</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;background:#f4f6f8;color:#222}
+header{background:#0b5cff;color:#fff;padding:22px 16px 20px;position:sticky;top:0;z-index:5;box-shadow:0 2px 8px #0002}
+h1{font-size:23px;margin:0 0 6px}
+.subtitle{font-size:13px;opacity:.9}
+.controls{display:flex;gap:8px;align-items:center;margin-top:16px}
+button,select{font:inherit;border:0;border-radius:10px}
+button{background:#fff;color:#0b5cff;font-weight:700;padding:10px 14px}
+select{padding:10px;background:#fff;color:#222;flex:1}
+main{max-width:760px;margin:auto;padding:16px}
+.monthbar{display:flex;align-items:center;justify-content:space-between;margin:2px 0 14px}
+.monthbar button{background:#fff;box-shadow:0 1px 4px #0001;font-size:20px;padding:6px 13px}
+.month{font-size:22px;font-weight:800}
+.count{font-size:13px;color:#666;margin-bottom:12px}
+.event{background:#fff;border-radius:14px;padding:15px;margin-bottom:11px;box-shadow:0 1px 5px #0001}
+.event.high{border-left:6px solid #e53935}
+.event.medium{border-left:6px solid #f5a623}
+.event.low{border-left:6px solid #2e9d59}
+.date{font-weight:800;color:#0b5cff;font-size:14px}
+.name{font-size:18px;font-weight:800;margin:5px 0}
+.place{font-size:14px;color:#555}
+.badge{display:inline-block;margin-top:8px;padding:4px 8px;border-radius:7px;font-size:12px;font-weight:700;background:#eee}
+.high .badge{background:#ffe4e4;color:#c62828}
+.medium .badge{background:#fff0d4;color:#a25b00}
+.low .badge{background:#e4f5e9;color:#23753f}
+.empty{text-align:center;padding:40px 10px;color:#777;background:#fff;border-radius:14px}
+footer{font-size:11px;color:#777;text-align:center;padding:20px}
+</style>
+</head>
+<body>
+<header>
+  <h1>北海道イベントチェック</h1>
+  <div class="subtitle">北海道内のイベントを月ごとに一覧で確認</div>
+  <div class="controls">
+    <button id="prev">‹</button>
+    <select id="monthSelect" aria-label="月を選択"></select>
+    <button id="next">›</button>
+  </div>
+</header>
+
+<main>
+  <div class="monthbar">
+    <div class="month" id="monthTitle"></div>
+  </div>
+  <div class="count" id="count"></div>
+  <div id="events"></div>
+</main>
+
+<footer>
+  イベント情報は随時変更される場合があります。<br>
+  参考：北海道観光公式サイト HOKKAIDO LOVE!
+</footer>
+
+<script>
+const events = [
+  {start:"2026-09-04",end:"2026-09-06",name:"とかちマルシェ",place:"帯広市",level:"medium",type:"グルメ・マルシェ"},
+  {start:"2026-09-05",end:"2026-09-27",name:"特急ニセコ号",place:"札幌・ニセコ・函館",level:"low",type:"観光・交通"},
+  {start:"2026-09-06",end:"2026-09-06",name:"太陽の丘えんがる公園・コスモスフェスタ",place:"遠軽町",level:"medium",type:"イベント"},
+  {start:"2026-09-06",end:"2026-09-06",name:"千歳基地「航空祭」",place:"千歳市",level:"high",type:"航空イベント"},
+  {start:"2026-09-11",end:"2026-10-03",name:"さっぽろオータムフェスト",place:"札幌市",level:"high",type:"大型グルメイベント"},
+  {start:"2026-09-12",end:"2026-09-13",name:"釧路大漁どんぱく",place:"釧路市",level:"high",type:"祭り・花火"},
+  {start:"2026-09-13",end:"2026-10-12",name:"奇跡のイルミネート",place:"上川町・層雲峡",level:"low",type:"イルミネーション"},
+  {start:"2026-09-19",end:"2026-09-19",name:"鉄道フェスティバル in 北海道",place:"札幌市",level:"medium",type:"イベント"},
+  {start:"2026-09-19",end:"2026-09-20",name:"いわみざわ百餅祭り",place:"岩見沢市",level:"high",type:"祭り"},
+  {start:"2026-09-19",end:"2026-09-21",name:"北の恵みあさひかわ食べマルシェ",place:"旭川市",level:"high",type:"大型グルメイベント"},
+  {start:"2026-09-20",end:"2026-09-20",name:"松前城下マグロまつり",place:"松前町",level:"medium",type:"グルメイベント"},
+  {start:"2026-09-20",end:"2026-09-20",name:"北海道福島町 FOOD STADIUM",place:"福島町",level:"medium",type:"グルメイベント"},
+  {start:"2026-09-24",end:"2026-09-24",name:"地獄の谷の鬼花火",place:"登別市",level:"medium",type:"花火"},
+  {start:"2026-09-26",end:"2026-09-27",name:"グルメワンダーパーク函館",place:"函館市",level:"medium",type:"大型グルメイベント"},
+  {start:"2026-09-26",end:"2026-09-27",name:"インディアン水車まつり",place:"千歳市",level:"medium",type:"祭り"},
+  {start:"2026-09-27",end:"2026-09-27",name:"しんとく新そば祭り",place:"新得町",level:"medium",type:"グルメイベント"}
+];
+
+let current = new Date();
+current.setDate(1);
+
+const fmt = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const jpDate = s => {
+  const d = new Date(s+"T00:00:00");
+  return `${d.getMonth()+1}/${d.getDate()}（${"日月火水木金土"[d.getDay()]}）`;
+};
+const rangeText = e => e.start===e.end ? jpDate(e.start) : `${jpDate(e.start)}〜${jpDate(e.end)}`;
+
+function overlapsMonth(e, y, m){
+  const first = `${y}-${String(m+1).padStart(2,"0")}-01`;
+  const lastDate = new Date(y,m+1,0).getDate();
+  const last = `${y}-${String(m+1).padStart(2,"0")}-${String(lastDate).padStart(2,"0")}`;
+  return e.start <= last && e.end >= first;
+}
+function buildMonthSelect(){
+  const sel=document.getElementById("monthSelect");
+  sel.innerHTML="";
+  for(let i=-6;i<=12;i++){
+    const d=new Date(current.getFullYear(),current.getMonth()+i,1);
+    const o=document.createElement("option");
+    o.value=`${d.getFullYear()}-${d.getMonth()}`;
+    o.textContent=`${d.getFullYear()}年${d.getMonth()+1}月`;
+    sel.appendChild(o);
+  }
+  sel.value=`${current.getFullYear()}-${current.getMonth()}`;
+}
+function render(){
+  buildMonthSelect();
+  const y=current.getFullYear(), m=current.getMonth();
+  document.getElementById("monthTitle").textContent=`${y}年${m+1}月`;
+  const list=events.filter(e=>overlapsMonth(e,y,m)).sort((a,b)=>a.start.localeCompare(b.start));
+  document.getElementById("count").textContent=`今月の掲載イベント：${list.length}件`;
+  const box=document.getElementById("events");
+  box.innerHTML="";
+  if(!list.length){box.innerHTML='<div class="empty">この月のイベントはまだ登録されていません。</div>';return;}
+  list.forEach(e=>{
+    const div=document.createElement("div");
+    div.className=`event ${e.level}`;
+    const label=e.level==="high"?"仕事への影響に注意":e.level==="medium"?"混雑に注意":"参考イベント";
+    div.innerHTML=`<div class="date">${rangeText(e)}</div>
+      <div class="name">${e.name}</div>
+      <div class="place">📍 ${e.place}</div>
+      <span class="badge">${e.type} ・ ${label}</span>`;
+    box.appendChild(div);
+  });
+}
+document.getElementById("prev").onclick=()=>{current.setMonth(current.getMonth()-1);render();};
+document.getElementById("next").onclick=()=>{current.setMonth(current.getMonth()+1);render();};
+document.getElementById("monthSelect").onchange=e=>{
+  const [y,m]=e.target.value.split("-").map(Number);
+  current=new Date(y,m,1);render();
+};
+render();
+</script>
+</body>
+</html>
