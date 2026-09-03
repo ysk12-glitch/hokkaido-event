@@ -30,7 +30,7 @@ main{max-width:760px;margin:auto;padding:16px}
 .high .badge{background:#ffe4e4;color:#c62828}
 .medium .badge{background:#fff0d4;color:#a25b00}
 .low .badge{background:#e4f5e9;color:#23753f}
-.tap{font-size:11px;color:#777;margin-top:8px}
+.impact{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.impact span{font-size:11px;font-weight:800;padding:4px 7px;border-radius:7px;background:#f1f3f5}.high .impact span{background:#ffe8e8;color:#b71c1c}.medium .impact span{background:#fff2dc;color:#8a4b00}.low .impact span{background:#e8f5ec;color:#246b3a}.tap{font-size:11px;color:#777;margin-top:8px}
 .empty{text-align:center;padding:40px 10px;color:#777;background:#fff;border-radius:14px}
 footer{font-size:11px;color:#777;text-align:center;padding:20px}
 .modal{display:none;position:fixed;inset:0;background:#0008;z-index:20;padding:20px;align-items:center;justify-content:center}
@@ -40,14 +40,14 @@ footer{font-size:11px;color:#777;text-align:center;padding:20px}
 .modal h2{font-size:22px;margin:7px 0 12px}
 .modal-place{color:#555;margin-bottom:12px}
 .modal-type{display:inline-block;background:#eef3ff;color:#0b5cff;border-radius:8px;padding:5px 9px;font-size:12px;font-weight:700}
-.modal-desc{line-height:1.7;margin:16px 0}
+.modal-desc{line-height:1.7;margin:16px 0}.modal-impact{background:#f5f7fa;border-radius:12px;padding:12px;margin:14px 0;line-height:1.8;font-size:13px}.modal-impact strong{font-size:14px}
 .close{width:100%;background:#0b5cff;color:#fff;margin-top:8px}
 </style>
 </head>
 <body>
 <header>
   <h1>北海道イベントチェック</h1>
-  <div class="subtitle">北海道内のイベントを月ごとに一覧で確認</div>
+  <div class="subtitle">北海道内のマラソン・祭り・花火・ライブなど、人が集まるイベントをチェック</div>
   <div class="controls">
     <button id="prev">‹</button>
     <select id="monthSelect" aria-label="月を選択"></select>
@@ -72,14 +72,15 @@ footer{font-size:11px;color:#777;text-align:center;padding:20px}
     <h2 id="modalName"></h2>
     <div class="modal-place" id="modalPlace"></div>
     <span class="modal-type" id="modalType"></span>
-    <div class="modal-desc" id="modalDesc"></div>
+    <div class="modal-desc" id="modalDesc"></div><div class="modal-impact" id="modalImpact"></div>
     <button class="close" id="closeModal">閉じる</button>
   </div>
 </div>
 
 <script>
 const events = [
-{start:"2026-09-04",end:"2026-09-06",name:"とかちマルシェ",place:"帯広市",level:"medium",type:"グルメ・マルシェ",desc:"JR帯広駅周辺で開催される秋恒例の食イベント。道東のグルメやスイーツ、生演奏などを楽しめます。"},
+
+  {start:"2026-09-04",end:"2026-09-06",name:"とかちマルシェ",place:"帯広市",level:"medium",type:"グルメ・マルシェ",desc:"JR帯広駅周辺で開催される秋恒例の食イベント。道東のグルメやスイーツ、生演奏などを楽しめます。"},
   {start:"2026-09-05",end:"2026-09-27",name:"特急ニセコ号",place:"札幌・ニセコ・函館",level:"low",type:"観光・交通",desc:"札幌・ニセコ・函館を結ぶ秋の特別列車。沿線観光や鉄道利用の増加が見込まれます。"},
   {start:"2026-09-05",end:"2026-09-05",name:"北海道芸術花火",place:"札幌市・モエレ沼公園",level:"high",type:"花火",desc:"モエレ沼公園で開催される大規模な花火イベント。周辺道路や公共交通の混雑に注意が必要です。"},
   {start:"2026-06-01",end:"2026-10-31",name:"定山渓夏灯路",place:"札幌市・定山渓",level:"low",type:"ライトアップ",desc:"定山渓温泉街を提灯やランタンの灯りで彩る夜の散策イベント。9〜10月は18時頃から点灯します。"},
@@ -154,7 +155,19 @@ const events = [
   {start:"2026-08-13",end:"2026-08-13",name:"勝毎花火大会",place:"帯広市",level:"high",type:"大型花火",desc:"北海道最大級の花火大会の一つ。帯広市街や会場周辺の交通混雑に特に注意。"},
   {start:"2026-08-14",end:"2026-08-15",name:"おびひろ平原まつり",place:"帯広市",level:"high",type:"大型祭り",desc:"神輿や太鼓演奏などが行われる十勝最大級の夏祭り。帯広中心街が賑わいます。"},
   {start:"2026-08-21",end:"2026-08-22",name:"夜高あんどん祭り",place:"沼田町",level:"high",type:"大型祭り",desc:"高さ約7mの巨大あんどんがぶつかり合う沼田町の名物祭り。夜間の町中心部に注意。"},
-  {start:"2026-08-30",end:"2026-08-30",name:"ながぬまマオイ夢祭り",place:"長沼町",level:"medium",type:"地域祭り",desc:"名物競技や特産グルメが楽しめる長沼町の夏祭り。"}
+  {start:"2026-08-30",end:"2026-08-30",name:"ながぬまマオイ夢祭り",place:"長沼町",level:"medium",type:"地域祭り",desc:"名物競技や特産グルメが楽しめる長沼町の夏祭り。"},
+  {start:"2026-09-04",end:"2026-09-06",name:"水曜どうでしょう祭UNITE2026",place:"札幌市・大和ハウス プレミストドーム",level:"high",type:"大型イベント",desc:"9月4日〜6日に開催される大型イベント。ドーム会場への来場者に加え、札幌圏の宿泊・交通への影響が見込まれるため、仕事で札幌方面へ移動する際は特に注意。"},
+  {start:"2026-09-26",end:"2026-09-26",name:"SBI MUSIC CIRCUS HOKKAIDO",place:"札幌市・大和ハウス プレミストドーム",level:"high",type:"大型音楽イベント",desc:"大和ハウス プレミストドームで開催される大型音楽イベント。札幌市内の宿泊や会場周辺の交通への影響に注意。"},
+  {start:"2026-10-24",end:"2026-10-24",name:"Number_i LIVE TOUR No.Ⅲ",place:"札幌市・大和ハウス プレミストドーム",level:"high",type:"ライブ・コンサート",desc:"人気アーティストのドーム公演。遠方からの来場者も見込まれるため、札幌市内のホテル・航空・JR・地下鉄などへの影響が大きくなる可能性があります。"},
+  {start:"2026-10-30",end:"2026-11-01",name:"Snow Man DOME TOUR 2026-2027 ALL SUITE",place:"札幌市・大和ハウス プレミストドーム",level:"high",type:"ライブ・ドーム公演",desc:"10月30日〜11月1日の3日間連続で行われるドーム公演。複数日開催のため、札幌市内の宿泊施設や交通への影響が特に大きいと考えられるイベントです。"},
+  {start:"2026-11-14",end:"2026-11-15",name:"YOASOBI ASIA 10-CITY DOME & STADIUM TOUR 2026-2027『超惑星』",place:"札幌市・大和ハウス プレミストドーム",level:"high",type:"ライブ・ドーム公演",desc:"11月14日・15日の2日間開催されるドームツアー北海道公演。遠方からの来場者を含め、ホテルや交通への影響が大きくなる可能性があります。"},
+  {start:"2026-10-17",end:"2026-10-17",name:"北海道コンサドーレ札幌 vs ブラウブリッツ秋田",place:"札幌市・大和ハウス プレミストドーム",level:"medium",type:"スポーツ・サッカー",desc:"J2リーグのホームゲーム。大型コンサートほどではないものの、試合時間帯は会場周辺の交通・駐車場の混雑に注意。"},
+  {start:"2026-11-07",end:"2026-11-08",name:"全国高校サッカー選手権 北海道大会",place:"札幌市・大和ハウス プレミストドーム",level:"medium",type:"スポーツ・サッカー",desc:"北海道大会の準決勝・決勝。学生・関係者・応援客が集まるため、会場周辺の交通に注意。"},
+  {start:"2026-11-22",end:"2026-11-23",name:"サッポロ モノ ヴィレッジ 2026 秋",place:"札幌市・大和ハウス プレミストドーム",level:"medium",type:"大型展示・マーケット",desc:"北海道最大級のハンドメイドイベント。多数の出店者と来場者が集まり、会場周辺の交通量が増えます。"},
+  {start:"2026-09-05",end:"2026-09-05",name:"水曜どうでしょう祭UNITE2026 本祭",place:"札幌市・大和ハウス プレミストドーム",level:"high",type:"大型イベント",desc:"9月5日の本祭。ドーム会場で朝から夜まで開催される大型イベントで、周辺道路・地下鉄・宿泊への影響に注意。"},
+  {start:"2026-09-21",end:"2026-09-21",name:"HBA Special Night 道新・秋華火",place:"札幌市・大和ハウス プレミストドーム周辺",level:"high",type:"大型花火イベント",desc:"9月21日に開催される大型花火イベント。夜間の会場周辺や帰宅時間帯の交通混雑に注意。"},
+  {start:"2026-09-13",end:"2026-09-13",name:"スーパーマリオ：RUN TO THE GOAL in Hokkaido 2026",place:"札幌市・大和ハウス プレミストドーム",level:"medium",type:"大型イベント・スポーツ",desc:"ドームで開催される大型ファミリーイベント。休日の会場周辺の人出・交通に注意。"},
+
 ];
 
 let current = new Date();
@@ -186,12 +199,19 @@ function buildMonthSelect(){
   sel.value=`${current.getFullYear()}-${current.getMonth()}`;
 }
 
+function impactText(level,type){
+  if(level==="high") return "<strong>⚠️ 仕事への影響：大</strong><br>🏨 ホテル：かなり注意　🚗 交通：かなり注意　👥 人出：大規模";
+  if(level==="medium") return "<strong>⚠️ 仕事への影響：中</strong><br>🏨 ホテル：注意　🚗 交通：注意　👥 人出：中規模";
+  return "<strong>ℹ️ 仕事への影響：小</strong><br>🏨 ホテル：通常　🚗 交通：通常　👥 人出：小〜中規模";
+}
+
 function openModal(e){
   document.getElementById("modalDate").textContent=rangeText(e);
   document.getElementById("modalName").textContent=e.name;
   document.getElementById("modalPlace").textContent="📍 "+e.place;
   document.getElementById("modalType").textContent=e.type;
   document.getElementById("modalDesc").textContent=e.desc;
+  document.getElementById("modalImpact").innerHTML=impactText(e.level,e.type);
   document.getElementById("modal").classList.add("show");
 }
 
@@ -215,6 +235,7 @@ function render(){
       <div class="name">${e.name}</div>
       <div class="place">📍 ${e.place}</div>
       <span class="badge">${e.type} ・ ${label}</span>
+      <div class="impact"><span>🏨 ホテル ${e.level==="high"?"大":e.level==="medium"?"注意":"小"}</span><span>🚗 交通 ${e.level==="high"?"大":e.level==="medium"?"注意":"小"}</span></div>
       <div class="tap">タップするとイベント内容を表示</div>`;
     div.onclick=()=>openModal(e);
     box.appendChild(div);
